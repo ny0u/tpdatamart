@@ -27,7 +27,7 @@ def download_and_upload_to_minio(url, bucket_name, object_name):
     response = requests.get(url, stream=True)
     response.raise_for_status()
 # Création d'un objet BytesIO pour stocker les données téléchargées
-    data = BytesIO(response.content)    #pour créer un objet similaire à un fichier en mémoire
+    data = BytesIO(response.content)   
  # Stockage dans Minio
     minio_client.put_object(
         bucket_name, object_name, data, length = int(response.headers['Content-Length'])
