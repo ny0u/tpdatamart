@@ -19,11 +19,13 @@ minio_client = Minio(
 
 
 def main():
+    
+    
     grab_data()
 
 
 
-def download_and_upload_to_minio(url, bucket_name, object_name):
+def to_minio(url, bucket_name, object_name):
     response = requests.get(url, stream=True)
     response.raise_for_status()
 # Création d'un objet BytesIO pour stocker les données téléchargées
@@ -32,10 +34,9 @@ def download_and_upload_to_minio(url, bucket_name, object_name):
     minio_client.put_object(
         bucket_name, object_name, data, length = int(response.headers['Content-Length'])
     )
-    print(f"Fichier {object_name} téléchargé et stocké dans MinIO")
+    print(f"Le fichier {object_name} téléchargé et stocké dans MinIO")
 
 
- # Configuration des paramètres
 def grab_data() -> None:
     base_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_"
     years = [2023]
@@ -49,7 +50,7 @@ def grab_data() -> None:
             object_name = f"yellow_tripdata_{year}-{month:02d}.parquet"
             
             
-            download_and_upload_to_minio(url, bucket_name, object_name)
+            to_minio(url, bucket_name, object_name)
 #l'instruction précedente télécharger et sauvgarde dans minio et puis affiche le succés de l'opération
             print(f"Fichier {object_name} téléchargé dans MinIO")
 
@@ -57,33 +58,34 @@ def grab_data() -> None:
 
 
 
-def grab_data_last_month() -> None:
-    """Grab the data from New York Yellow Taxi
-
-    This method download x files of the New York Yellow Taxi. 
+def last_month() -> None:
     
-    Files need to be saved into "../../data/raw" folder
-    This methods takes no arguments and returns nothing.
-    """
+    # URL de base pour les données des taxis jaunes de New York
     base_url = "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_" 
+    # Dossier de destination pour les fichiers téléchargés
     data_folder = "data/raw"
+    # Obtention de la date actuelle
     this_day = datetime.today().date()
-    month=this_day.month
-    year=this_day.year
+    month = this_day.month
+    year = this_day.year
 
-    if this_day.month == 1 :
-        year=year-1
-        month=12
-    else :
-        month=month-1    
-# La vérification que le chemin existe d'abord
+  
+    if this_day.month == 1:
+        year = year - 1
+        month = 12
+    else:
+        month = month - 1    
+
+   
     if not os.path.exists(data_folder):
         os.makedirs(data_folder)
 
+    # Construction de l'URL du fichier à télécharger
     url = f"{base_url}{year}-{month:02d}.parquet"  
+    # Construction du chemin complet pour enregistrer le fichier
     filename = f"{data_folder}/yellow_tripdata_{year}-{month}.parquet"
     
-    # Téléchargement du fichier  et ensuite l'affichage du texte
+    # Téléchargement du fichier et enregistrement localement
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
         with open(filename, 'wb') as f:
